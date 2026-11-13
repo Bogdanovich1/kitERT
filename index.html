@@ -31,6 +31,14 @@
       transition: background .3s, color .3s;
       background-image: radial-gradient(circle at top right, rgba(255,255,255,0.03), transparent 40%),
                         radial-gradient(circle at bottom left, rgba(255,255,255,0.03), transparent 40%);
+      overscroll-behavior: none;
+      touch-action: manipulation;
+    }
+
+    /* Запрет pull-to-refresh и overscroll на мобильных */
+    html, body, .view-container, .chat-messages, .chat-list {
+      overscroll-behavior-y: contain;
+      overscroll-behavior-x: none;
     }
 
     .app-layout { display: flex; height: 100vh; height: 100dvh; width: 100vw; overflow: hidden; }
@@ -40,6 +48,7 @@
       background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border-right: 1px solid var(--border); 
       display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; z-index: 100;
+      overscroll-behavior: contain;
     }
     .sidebar-header {padding: 24px 20px; border-bottom: 1px solid var(--border);}
     .sidebar-header h2 {margin: 0; font-size: 24px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;}
@@ -57,7 +66,7 @@
     }
 
     .content-area { flex: 1; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; position: relative;}
-    .view-container { flex: 1; overflow-y: auto; padding: 20px; }
+    .view-container { flex: 1; overflow-y: auto; padding: 20px; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; }
     .view { display: none; max-width: 800px; margin: 0 auto; }
     .view.active { display: block; }
     
@@ -74,14 +83,14 @@
     .chat-layout { display: flex; height: 100%; width: 100%; }
     .chat-sidebar { width: 320px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--surface); }
     .chat-sidebar-header { padding: 20px 24px; border-bottom: 1px solid var(--border); font-size: 20px; font-weight: 800; }
-    .chat-list { flex: 1; overflow-y: auto; }
+    .chat-list { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
     .chat-item { display: flex; align-items: center; gap: 14px; padding: 16px 20px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background .2s;}
     .chat-item:hover { background: var(--surface-hover); }
     .chat-item.active { background: var(--surface-hover); border-left: 4px solid var(--primary); }
     
     .chat-main { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-height: 0; height: 100%; }
     .chat-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; background: var(--surface);}
-    .chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
     
     .msg { max-width: 75%; padding: 14px 18px; border-radius: 18px; font-size: 15px; line-height: 1.4; word-break: break-word; box-shadow: 0 2px 8px rgba(0,0,0,0.05);}
     .msg.my { align-self: flex-end; background: var(--primary); color: var(--primary-text); border-bottom-right-radius: 4px; }
@@ -277,7 +286,7 @@
     .modal.show{display:flex; animation: fadeIn 0.2s;}
     @keyframes fadeIn {from{opacity:0}to{opacity:1}}
     
-    .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:100%;max-width:440px;max-height:85vh;overflow-y:auto; color: var(--text-main); box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: slideUp 0.3s;}
+    .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:100%;max-width:440px;max-height:85vh;overflow-y:auto; color: var(--text-main); box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: slideUp 0.3s; overscroll-behavior: contain;}
     @keyframes slideUp {from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
     
     .modal-box h2{margin:0 0 20px;font-size:22px; font-weight:800; letter-spacing: -0.5px;}
@@ -759,6 +768,24 @@
   };
   const savedTheme = localStorage.getItem('cg_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
+
+  // Блокировка pull-to-refresh на мобильных
+  document.addEventListener('touchmove', function(e) {
+    if (e.target.closest('.modal-box, .chat-messages, .view-container, .chat-list, .sidebar')) {
+      return;
+    }
+    if (e.target.closest('.modal')) {
+      return;
+    }
+    if (e.touches.length > 1) return;
+    const scrollEl = e.target.closest('.view-container, .chat-messages, .chat-list, .modal-box');
+    if (!scrollEl) {
+      if (document.body.scrollHeight <= window.innerHeight) {
+        e.preventDefault();
+      }
+      return;
+    }
+  }, { passive: false });
 
   window.openSidebar = () => {};
   window.closeSidebar = () => {};
