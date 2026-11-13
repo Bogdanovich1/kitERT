@@ -5,41 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>КИТ</title>
   
-  <!-- ИКОНКА ВКЛАДКИ (БЕЛЫЙ КВАДРАТ С НАДПИСЬЮ КИТ) -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ffffff'/><text x='50%' y='54%' font-family='Arial, sans-serif' font-weight='bold' font-size='36' fill='%23000000' text-anchor='middle' dominant-baseline='middle'>КИТ</text></svg>">
 
   <style>
     :root {
-      /* Темная тема */
-      --bg: #09090b; 
-      --surface: #121214; 
-      --surface-hover: #1c1c1f;
-      --text-main: #e4e4e7;
-      --text-muted: #a1a1aa;
-      --border: #27272a;
-      --primary: #f4f4f5; 
-      --primary-text: #18181b;
-      --danger: #ef4444;
-      --glass: rgba(18, 18, 20, 0.7);
-      --shadow: 0 8px 32px rgba(0,0,0,0.4);
-      --radius: 20px;
-      --radius-sm: 12px;
+      --bg: #09090b; --surface: #121214; --surface-hover: #1c1c1f;
+      --text-main: #e4e4e7; --text-muted: #a1a1aa; --border: #27272a;
+      --primary: #f4f4f5; --primary-text: #18181b; --danger: #ef4444;
+      --glass: rgba(18, 18, 20, 0.7); --shadow: 0 8px 32px rgba(0,0,0,0.4);
+      --radius: 20px; --radius-sm: 12px;
     }
     [data-theme="light"] {
-      /* Светлая тема */
-      --bg: #fafafa;
-      --surface: #ffffff;
-      --surface-hover: #f4f4f5;
-      --text-main: #18181b;
-      --text-muted: #71717a;
-      --border: #e4e4e7;
-      --primary: #18181b; 
-      --primary-text: #ffffff;
-      --danger: #dc2626;
-      --glass: rgba(255, 255, 255, 0.8);
-      --shadow: 0 8px 32px rgba(0,0,0,0.08);
-      --radius: 20px;
-      --radius-sm: 12px;
+      --bg: #fafafa; --surface: #ffffff; --surface-hover: #f4f4f5;
+      --text-main: #18181b; --text-muted: #71717a; --border: #e4e4e7;
+      --primary: #18181b; --primary-text: #ffffff; --danger: #dc2626;
+      --glass: rgba(255, 255, 255, 0.8); --shadow: 0 8px 32px rgba(0,0,0,0.08);
+      --radius: 20px; --radius-sm: 12px;
     }
 
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -54,7 +35,6 @@
 
     .app-layout { display: flex; height: 100vh; height: 100dvh; width: 100vw; overflow: hidden; }
 
-    /* ================= БОКОВАЯ ПАНЕЛЬ ================= */
     .sidebar { 
       width: 260px; height: 100vh; height: 100dvh; 
       background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -76,13 +56,11 @@
       padding: 2px 6px; border-radius: 10px; display: none;
     }
 
-    /* ================= КОНТЕНТНАЯ ОБЛАСТЬ ================= */
     .content-area { flex: 1; display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; position: relative;}
     .view-container { flex: 1; overflow-y: auto; padding: 20px; }
     .view { display: none; max-width: 800px; margin: 0 auto; }
     .view.active { display: block; }
     
-    /* УВЕДОМЛЕНИЯ */
     .notif-list { max-width: 600px; margin: 0 auto; }
     .notif-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; display: flex; gap: 16px; align-items: flex-start; box-shadow: var(--shadow);}
     .notif-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: var(--primary-text); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; flex-shrink: 0;}
@@ -91,7 +69,6 @@
     .notif-text { font-size: 14.5px; color: var(--text-muted); line-height: 1.5;}
     .notif-time { font-size: 12px; color: var(--text-muted); margin-top: 8px; opacity: 0.7;}
 
-    /* ЧАТЫ */
     #view-chats.view { max-width: 100%; height: 100%; padding: 0; margin: 0; display: none; flex-direction: column; }
     #view-chats.active { display: flex; }
     .chat-layout { display: flex; height: 100%; width: 100%; }
@@ -134,7 +111,6 @@
     .chat-input:focus { border-color: var(--primary); }
     .chat-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 15px; }
     
-    /* ================= АВТОРИЗАЦИЯ ================= */
     .auth-screen {
       position: fixed; inset: 0; background: var(--bg);
       display: none; z-index: 1000;
@@ -211,7 +187,6 @@
       .create-head h1 { font-size: 28px; }
     }
 
-    /* ================= МОБИЛЬНАЯ АДАПТАЦИЯ ================= */
     @media (max-width: 768px) {
       .sidebar { position: fixed; left: 0; top: 0; width: 70px; border-right: none;} 
       .sidebar-header { display: none; }
@@ -229,7 +204,6 @@
       .chat-main { width: 100%; }
     }
 
-    /* ================= ЛЕНТА ================= */
     .post{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;transition:all .2s; box-shadow: var(--shadow);}
     .post:hover{background:var(--surface-hover);}
     .post-head{display:flex;align-items:center;gap:12px}
@@ -257,7 +231,6 @@
     .report-btn { color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 6px 10px; transition: color 0.2s; border-radius: 8px;}
     .report-btn:hover { color: var(--danger); background: var(--surface-hover); }
 
-    /* ================= ПРОФИЛЬ ================= */
     .profile-head{padding:40px 20px 20px; display:flex; flex-direction:column; align-items:center; text-align:center;}
     .profile-avatar{width:110px;height:110px;border-radius:50%;border:3px solid var(--border);background:var(--surface-hover);display:flex;align-items:center;justify-content:center;color:var(--text-main);font-size:40px;font-weight:800; overflow:hidden; margin-bottom:16px; box-shadow: var(--shadow);}
     .profile-avatar img {width:100%; height:100%; object-fit:cover;}
@@ -269,7 +242,6 @@
     .profile-stats { display: flex; gap: 24px; margin-top: 20px; font-size: 15px; color: var(--text-muted); justify-content: center;}
     .profile-stats b { color: var(--text-main); font-size: 17px;}
 
-    /* ================= НАСТРОЙКИ ================= */
     .settings-group {margin-bottom: 28px;}
     .settings-title {font-size: 13px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; margin-left: 6px; letter-spacing: 0.5px;}
     .theme-toggle {display: flex; background: var(--surface); border-radius: var(--radius-sm); padding: 6px; gap: 6px; border: 1px solid var(--border);}
@@ -294,7 +266,6 @@
     .setting-row {display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; flex-wrap: wrap; box-shadow: var(--shadow);}
     .setting-row span {font-size: 15px; font-weight: 600;}
     
-    /* ПОЛЗУНКИ (Switch) */
     .switch {position: relative; display: inline-block; width: 52px; height: 30px;}
     .switch input {opacity: 0; width: 0; height: 0;}
     .slider {position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .3s; border-radius: 34px;}
@@ -302,7 +273,6 @@
     input:checked + .slider {background-color: var(--primary);}
     input:checked + .slider:before {transform: translateX(22px); background-color: var(--primary-text);}
 
-    /* ================= МОДАЛКИ ================= */
     .modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:20px}
     .modal.show{display:flex; animation: fadeIn 0.2s;}
     @keyframes fadeIn {from{opacity:0}to{opacity:1}}
@@ -323,7 +293,6 @@
     
     .empty{text-align:center;color:var(--text-muted);font-size:15px;padding:60px 30px}
 
-    /* ================= АДМИНКА ================= */
     .admin-card{background:var(--surface-hover); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; margin-bottom:14px; display:flex; flex-direction:column; gap:10px;}
     .admin-btn {background:transparent; border:1px solid var(--danger); color:var(--danger); border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; transition: all .2s;}
     .admin-btn:hover {background: rgba(239,68,68,0.1);}
@@ -335,12 +304,10 @@
     .stat-box h3 {margin:0 0 6px 0; font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing: 0.5px;}
     .stat-box span {font-size:28px; font-weight:800; color:var(--text-main);}
     
-    /* ================= ПОИСК ================= */
     .search-wrap {margin-bottom: 20px;}
     .search-input {width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; color: var(--text-main); font-size: 16px; outline: none; box-shadow: var(--shadow); transition: border 0.2s;}
     .search-input:focus {border-color: var(--primary);}
 
-    /* ================= FAB ================= */
     .fab {position:fixed; right:30px; bottom:30px; width:64px; height:64px; border-radius:50%; border:0; background:var(--primary); color:var(--primary-text); display:flex; align-items:center; justify-content:center; box-shadow:0 10px 30px rgba(0,0,0,0.3); z-index: 40; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s;}
     .fab:hover {box-shadow: 0 12px 40px rgba(0,0,0,0.4); transform: scale(1.05);}
     .fab:active {transform: scale(0.95);}
@@ -349,9 +316,7 @@
 </head>
 <body>
 
-<!-- ================= АВТОРИЗАЦИЯ ================= -->
 <div class="auth-screen" id="authScreen">
-  
   <div class="auth-left">
     <div class="fake-post">
       <div class="fake-post-head">
@@ -449,7 +414,6 @@
   </div>
 </div>
 
-<!-- ================= ОСНОВНОЕ ПРИЛОЖЕНИЕ ================= -->
 <div class="app-layout" id="appScreen" style="display: none;">
   
   <div class="sidebar" id="sidebar">
@@ -649,9 +613,27 @@
   const notifsRef = ref(db, 'notifications');
 
   const SYSTEM_ACCOUNTS = {
-    bogdan: { id: 'bogdan-core', name: 'Bogdan', handle: 'bogdan', aliases: ['svqne'], password: '9080Vop1234', bio: 'CEO КИТ', verified: true, extraHandles: ['@itp', '@итп'] },
-    lunrai: { id: 'lunrai-core', name: 'Lunrai', handle: 'lunrai', aliases: ['svqne'], password: 'lunraistopsnop', bio: 'разработчик КИТ', verified: true },
-    hanter: { id: 'hanter-core', name: 'HANTER', handle: 'HANTER', password: 'Roman2008', bio: 'Заместитель CEO', verified: true }
+    bogdan: { 
+      id: 'bogdan-core', name: 'Bogdan', handle: 'bogdan', aliases: ['svqne'], 
+      password: '9080Vop1234', bio: 'CEO КИТ', verified: true, 
+      extraHandles: ['@КИТCEO', '@kit'] 
+    },
+    lunrai: { 
+      id: 'lunrai-core', name: 'Lunrai', handle: 'lunrai', aliases: ['svqne'], 
+      password: 'lunraistopsnop', bio: 'разработчик КИТ', verified: true 
+    },
+    hanter: { 
+      id: 'hanter-core', name: 'HANTER', handle: 'HANTER', password: 'Roman2008', 
+      bio: 'Заместитель CEO', verified: true 
+    },
+    osloeb67: {
+      id: 'osloeb67-core', name: 'osloeb67', handle: 'osloeb67', 
+      aliases: ['bogkm', 'aftter', 'smirnovbogim', 'rockstar'], 
+      password: 'osloeb67', 
+      bio: 'дефер всего КИТ', verified: true, 
+      avatar: 'https://s6.iimage.su/s/13/gmykUBSxdkRFsmEIoPeuRgmENzZYCo3zu6uzduCzo.jpg',
+      extraHandles: ['@bogkm', '@aftter', '@smirnovbogim', '@rockstar']
+    }
   };
 
   let profile = null;
@@ -1035,7 +1017,11 @@
         if (sys.id === 'bogdan-core') {
           update(ref(db, 'users/' + sys.id), { banned: false });
         }
-        profile = { id: sys.id, name: sys.name, handle: sys.handle, bio: sys.bio, verified: true, avatar: null, extraHandles: sys.extraHandles };
+        profile = { 
+          id: sys.id, name: sys.name, handle: sys.handle, 
+          bio: sys.bio, verified: true, avatar: sys.avatar || null, 
+          extraHandles: sys.extraHandles 
+        };
         localStorage.setItem('cg_profile', JSON.stringify(profile));
         unreadCounts = JSON.parse(localStorage.getItem('cg_unread_' + profile.id) || '{}');
         unreadNotifs = parseInt(localStorage.getItem('cg_unread_notifs_' + profile.id) || '0');
@@ -1103,7 +1089,7 @@
           if (!snap.exists()) {
             set(ref(db, 'users/' + sys.id), {
               name: sys.name, handle: sys.handle, bio: sys.bio,
-              verified: true, phone: 'secret', avatar: null, banned: false, ts: Date.now()
+              verified: true, phone: 'secret', avatar: sys.avatar || null, banned: false, ts: Date.now()
             });
           }
         });
@@ -1786,8 +1772,8 @@
     }
 
     let verifyNoteHTML = '';
-    if (uData.id === 'bogdan-core' || uData.id === 'hanter-core') {
-      verifyNoteHTML = '<div class="profile-note">аккаунт подтверждён компанией КИТ</div>';
+    if (uData.verified) {
+      verifyNoteHTML = `<div class="profile-note">${esc(uData.verifiedText || 'аккаунт подтверждён компанией КИТ')}</div>`;
     }
 
     let extraHandlesHTML = '';
@@ -1837,7 +1823,7 @@
   function openAdminPanel() {
     const box = $('#modalBox');
     const totalPosts = postsMap.size;
-    let totalUsers = 3; 
+    let totalUsers = 4; 
     usersMap.forEach(u => { if(u.phone) totalUsers++; });
 
     const sortedReports = Array.from(reportsMap.values()).sort((a,b) => b.ts - a.ts);
