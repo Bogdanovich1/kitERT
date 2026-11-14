@@ -35,7 +35,6 @@
       touch-action: manipulation;
     }
 
-    /* Запрет pull-to-refresh и overscroll на мобильных */
     html, body, .view-container, .chat-messages, .chat-list, .sidebar, .modal-box {
       overscroll-behavior-y: contain;
       overscroll-behavior-x: none;
@@ -320,6 +319,31 @@
     .fab:hover {box-shadow: 0 12px 40px rgba(0,0,0,0.4); transform: scale(1.05);}
     .fab:active {transform: scale(0.95);}
     .fab svg {width:30px; height:30px; stroke-width: 2.5;}
+
+    /* ===== NFT-подарок, летающий вокруг аватарки ===== */
+    .gift-orbit {
+      position: absolute;
+      width: 46px; height: 46px;
+      pointer-events: none;
+      z-index: 5;
+      animation: giftSpin 6s linear infinite;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.45));
+    }
+    .gift-orbit img { width:100%; height:100%; object-fit:contain; display:block; border-radius:50%; }
+    @keyframes giftSpin {
+      0%   { transform: rotate(0deg) translateX(62px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(62px) rotate(-360deg); }
+    }
+    .profile-avatar-wrap { position: relative; display: flex; align-items: center; justify-content: center; width: 200px; height: 200px; margin-bottom: 8px; }
+    .profile-avatar-wrap .profile-avatar { margin: 0; }
+
+    /* Карточка магазина */
+    .shop-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); display: flex; gap: 18px; align-items: flex-start; }
+    .shop-card .shop-img { width: 96px; height: 96px; border-radius: 16px; object-fit: cover; flex-shrink: 0; background: var(--surface-hover); }
+    .shop-card .shop-info { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .shop-card h3 { margin: 0; font-size: 18px; font-weight: 800; }
+    .shop-card .shop-price { font-size: 15px; font-weight: 700; color: var(--primary); }
+    .shop-card .shop-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.4; }
   </style>
 </head>
 <body>
@@ -444,6 +468,11 @@
       <div class="unread-badge" id="notifBadge" style="display:none;">0</div>
     </button>
 
+    <button class="sidebar-item" data-tab="shop" onclick="switchTab('shop')">
+      <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+      <span>Магазин</span>
+    </button>
+
     <button class="sidebar-item" data-tab="search" onclick="switchTab('search')">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <span>Поиск</span>
@@ -497,6 +526,21 @@
         </div>
       </div>
 
+      <div id="view-shop" class="view">
+        <div style="max-width: 700px; margin: 0 auto;">
+          <h2 style="font-size: 24px; font-weight: 800; margin: 0 0 20px 0;">🛍️ Магазин</h2>
+          <div class="shop-card">
+            <img class="shop-img" src="https://s6.iimage.su/s/14/goqVIn6xnB7BMDE6m7TkufspKNdrcBhlF0PgXG1rz.png" alt="Forge-Prize KIT">
+            <div class="shop-info">
+              <h3>Forge-Prize — KIT</h3>
+              <div class="shop-price">Стоимость: 60 ₽</div>
+              <div class="shop-desc">Эксклюзивный подарок КИТ. После покупки появится в вашем профиле и будет летать вокруг аватарки, как NFT в Telegram.</div>
+              <button class="btn btn-primary" style="margin-top:8px;" onclick="buyForgePrize()">Связаться о покупке</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="view-search" class="view">
         <div class="search-wrap">
           <input type="text" class="search-input" id="searchUserInput" placeholder="Поиск людей по @username...">
@@ -506,7 +550,10 @@
 
       <div id="view-profile" class="view">
         <div class="profile-head">
-          <div class="profile-avatar" id="pAvatar">?</div>
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar" id="pAvatar">?</div>
+            <div class="gift-orbit" id="pGift" style="display:none;"><img src="https://s6.iimage.su/s/14/goqVIn6xnB7BMDE6m7TkufspKNdrcBhlF0PgXG1rz.png" alt="Forge-Prize"></div>
+          </div>
           <div class="profile-name" id="pName">@user</div>
           <div class="profile-handle" id="pHandle">@user</div>
           
@@ -620,6 +667,10 @@
   const reportsRef = ref(db, 'reports');
   const notifsRef = ref(db, 'notifications');
 
+  // Подарок Forge-Prize
+  const FORGE_PRIZE_IMG = 'https://s6.iimage.su/s/14/goqVIn6xnB7BMDE6m7TkufspKNdrcBhlF0PgXG1rz.png';
+  const FORGE_PRIZE_OWNERS = ['bogdan-core', 'hanter-core', 'osloeb67-core', 'lunrai-core'];
+
   const SYSTEM_ACCOUNTS = {
     bogdan: { 
       id: 'bogdan-core', name: 'Bogdan', handle: 'bogdan', aliases: ['svqne'], 
@@ -671,6 +722,35 @@
 
   const $ = s => document.querySelector(s);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  function hasForgePrize(userId) {
+    return FORGE_PRIZE_OWNERS.includes(userId);
+  }
+
+  window.buyForgePrize = () => {
+    const box = $('#modalBox');
+    box.innerHTML = `
+      <h2>Forge-Prize — KIT</h2>
+      <div style="text-align:center; margin-bottom:16px;">
+        <img src="${FORGE_PRIZE_IMG}" alt="Forge-Prize" style="width:120px; height:120px; border-radius:20px; object-fit:cover;">
+      </div>
+      <p style="font-size:14.5px; color:var(--text-muted); line-height:1.5; margin-bottom:16px;">
+        Стоимость: <b style="color:var(--primary);">60 ₽</b><br>
+        Чтобы приобрести подарок, свяжитесь с HANTER — он выдаст вам Forge-Prize и добавит его в ваш профиль.
+      </p>
+      <button class="btn btn-primary" id="contactHanterBtn">💬 Связаться о покупке</button>
+      <button class="btn ghost" onclick="closeModal()">Закрыть</button>
+    `;
+    $('#modal').classList.add('show');
+    $('#contactHanterBtn').onclick = () => {
+      closeModal();
+      if (profile && profile.id !== 'hanter-core') {
+        openChatWith('hanter-core', 'HANTER');
+      } else {
+        toast('Вы уже HANTER — подарок у вас уже есть 😉');
+      }
+    };
+  };
 
   function playNotificationSound() {
     if (!notifSettings.sound) return;
@@ -810,11 +890,9 @@
       const y = e.touches[0].clientY;
       const delta = y - startY;
 
-      // Если тянем вниз и контейнер уже в самом верху — блокируем
       if (delta > 0 && locked && atTop(scrollEl)) {
         if (e.cancelable) e.preventDefault();
       }
-      // Если пользователь пошёл вверх — снимаем блокировку
       if (delta < 0) locked = false;
     }, { passive: false });
 
@@ -1671,6 +1749,13 @@
       $('#pAvatar').innerHTML = nameToUse.charAt(0).toUpperCase();
     }
 
+    // Подарок в своём профиле
+    if (hasForgePrize(profile.id)) {
+      $('#pGift').style.display = 'block';
+    } else {
+      $('#pGift').style.display = 'none';
+    }
+
     $('#pName').innerHTML = esc(nameToUse) + (profile.verified ? ' <svg class="verified"><use href="#ic-verified"/></svg>' : '');
     
     let handleHTML = `@${profile.handle}`;
@@ -1705,7 +1790,7 @@
     const targetView = document.getElementById('view-' + tabName);
     if (targetView) targetView.classList.add('active');
     
-    $('#fabPost').style.display = (tabName === 'settings' || tabName === 'search' || tabName === 'chats' || tabName === 'notifications') ? 'none' : 'flex';
+    $('#fabPost').style.display = (tabName === 'settings' || tabName === 'search' || tabName === 'chats' || tabName === 'notifications' || tabName === 'shop') ? 'none' : 'flex';
     $('#mainScroll').scrollTop = 0;
 
     if (tabName === 'notifications') {
@@ -1844,9 +1929,18 @@
       extraHandlesHTML = `<div class="profile-handle" style="font-size:12px; opacity:0.8;">а так же: ${uData.extraHandles.join(', ')}</div>`;
     }
 
+    // Подарок Forge-Prize
+    const showGift = hasForgePrize(uData.id);
+    const giftHTML = showGift
+      ? `<div class="gift-orbit" style="position:absolute; top:-10px; left:-10px;"><img src="${FORGE_PRIZE_IMG}" alt="Forge-Prize"></div>`
+      : '';
+
     box.innerHTML = `
       <div style="text-align:center">
-        <div class="profile-avatar" style="margin:0 auto; background:var(--card2); overflow:hidden;">${avHTML}</div>
+        <div class="profile-avatar-wrap" style="margin:0 auto; width:160px; height:160px;">
+          <div class="profile-avatar" style="margin:0; width:120px; height:120px; background:var(--card2); overflow:hidden;">${avHTML}</div>
+          ${giftHTML}
+        </div>
         <div class="profile-name" style="justify-content:center;margin-top:14px">${esc(uData.name)} ${uData.verified ? '<svg class="verified"><use href="#ic-verified"/></svg>' : ''}</div>
         <div class="profile-handle">@${uData.handle}</div>
         ${extraHandlesHTML}
