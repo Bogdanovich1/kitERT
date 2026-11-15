@@ -320,7 +320,6 @@
     .fab:active {transform: scale(0.95);}
     .fab svg {width:30px; height:30px; stroke-width: 2.5;}
 
-    /* ===== NFT-подарок, летающий вокруг аватарки ===== */
     .gift-orbit {
       position: absolute;
       width: 46px; height: 46px;
@@ -337,13 +336,17 @@
     .profile-avatar-wrap { position: relative; display: flex; align-items: center; justify-content: center; width: 200px; height: 200px; margin-bottom: 8px; }
     .profile-avatar-wrap .profile-avatar { margin: 0; }
 
-    /* Карточка магазина */
     .shop-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); display: flex; gap: 18px; align-items: flex-start; }
     .shop-card .shop-img { width: 96px; height: 96px; border-radius: 16px; object-fit: cover; flex-shrink: 0; background: var(--surface-hover); }
     .shop-card .shop-info { flex: 1; display: flex; flex-direction: column; gap: 8px; }
     .shop-card h3 { margin: 0; font-size: 18px; font-weight: 800; }
     .shop-card .shop-price { font-size: 15px; font-weight: 700; color: var(--primary); }
     .shop-card .shop-desc { font-size: 13.5px; color: var(--text-muted); line-height: 1.4; }
+    
+    .post-preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .post-preview-item { position: relative; width: 80px; height: 80px; }
+    .post-preview-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+    .post-preview-item .remove-img { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -513,10 +516,6 @@
             <div class="chat-messages" id="chatMessages" style="display:none;"></div>
             
             <div class="chat-input-area" id="chatInputArea" style="display:none;">
-              <input type="file" id="chatPhotoInput" accept="image/*" style="display:none;">
-              <button class="attach-btn" onclick="document.getElementById('chatPhotoInput').click()" title="Прикрепить фото">
-                <svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-              </button>
               <input type="text" class="chat-input" id="chatInput" placeholder="Написать сообщение...">
               <button class="chat-send" onclick="sendMessage()">
                 <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
@@ -667,7 +666,6 @@
   const reportsRef = ref(db, 'reports');
   const notifsRef = ref(db, 'notifications');
 
-  // Подарок Forge-Prize
   const FORGE_PRIZE_IMG = 'https://s6.iimage.su/s/14/goqVIn6xnB7BMDE6m7TkufspKNdrcBhlF0PgXG1rz.png';
   const FORGE_PRIZE_OWNERS = ['bogdan-core', 'hanter-core', 'osloeb67-core', 'lunrai-core'];
 
@@ -717,8 +715,7 @@
   let unreadCounts = JSON.parse(localStorage.getItem('cg_unread_' + (profile ? profile.id : 'unknown')) || '{}');
   let unreadNotifs = parseInt(localStorage.getItem('cg_unread_notifs_' + (profile ? profile.id : 'unknown')) || '0');
   
-  let tempPostImage = null;
-  let tempChatImage = null;
+  let tempPostImages = []; // Изменено на массив для лимита
 
   const $ = s => document.querySelector(s);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -851,9 +848,6 @@
   const savedTheme = localStorage.getItem('cg_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
 
-  // ============================================================
-  // УНИВЕРСАЛЬНАЯ БЛОКИРОВКА PULL-TO-REFRESH (iOS + Android + WebView)
-  // ============================================================
   (function blockPullToRefresh() {
     let startY = 0;
     let scrollEl = null;
@@ -1312,22 +1306,22 @@
       b.onclick = () => toggleTheme(b.dataset.themeSet);
     });
 
+    // ЛОГИКА СОЗДАНИЯ ПОСТА С ЛИМИТОМ ФОТО
     $('#fabPost').onclick = () => {
       const myUserData = usersMap.get(profile.id);
       if (myUserData && myUserData.banned) { alert('❌ Вы забанены.'); return; }
       
-      tempPostImage = null;
+      tempPostImages = [];
       const box = $('#modalBox');
       box.innerHTML = `
         <h2>Новый пост</h2>
         <textarea id="newPostText" placeholder="Что происходит?"></textarea>
-        <div style="display:flex; gap:10px; margin-bottom:10px;">
+        <div style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
           <input type="file" id="postImageInput" accept="image/*" style="display:none;">
-          <button class="btn ghost" onclick="document.getElementById('postImageInput').click()" style="margin:0; padding:10px 16px; font-size:14px; flex:none;">📷 Фото</button>
+          <button class="btn ghost" onclick="document.getElementById('postImageInput').click()" style="margin:0; padding:10px 16px; font-size:14px; flex:none;">📷 Добавить фото</button>
+          <span id="photoLimitText" style="font-size: 12px; color: var(--text-muted);">0 / 3</span>
         </div>
-        <div id="postImagePreview" style="display:none; margin-bottom:10px; text-align:center;">
-          <img id="postPreviewImg" style="max-width:100%; max-height:200px; border-radius:12px;">
-        </div>
+        <div id="postImagePreview" class="post-preview-container"></div>
         <button class="btn btn-primary" id="postPublish">Опубликовать</button>
         <button class="btn ghost" onclick="closeModal()">Отмена</button>
       `;
@@ -1336,20 +1330,43 @@
       $('#postImageInput').onchange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        
+        if (tempPostImages.length >= 3) {
+          toast('Можно прикрепить не более 3 фото');
+          return;
+        }
+
         compressImage(file, 800, 800, 0.7, (base64) => {
-          tempPostImage = base64;
-          $('#postImagePreview').style.display = 'block';
-          $('#postPreviewImg').src = base64;
+          tempPostImages.push(base64);
+          renderPostPreviews();
         });
+      };
+
+      function renderPostPreviews() {
+        const container = $('#postImagePreview');
+        container.innerHTML = tempPostImages.map((src, index) => `
+          <div class="post-preview-item">
+            <img src="${src}">
+            <div class="remove-img" onclick="removePostImage(${index})">×</div>
+          </div>
+        `).join('');
+        $('#photoLimitText').textContent = `${tempPostImages.length} / 3`;
+      }
+
+      window.removePostImage = (index) => {
+        tempPostImages.splice(index, 1);
+        renderPostPreviews();
       };
 
       $('#postPublish').onclick = () => {
         const txt = $('#newPostText').value.trim();
-        if (!txt && !tempPostImage) { toast('Напишите текст или добавьте фото'); return; }
+        if (!txt && tempPostImages.length === 0) { toast('Напишите текст или добавьте фото'); return; }
         
         push(postsRef, {
           authorId: profile.id, authorName: profile.name, authorHandle: profile.handle,
-          verified: !!profile.verified, text: txt, image: tempPostImage, likes: 0, comments: 0, ts: Date.now()
+          verified: !!profile.verified, text: txt, 
+          images: tempPostImages, // Сохраняем массив фото
+          likes: 0, comments: 0, ts: Date.now()
         });
         closeModal();
         toast('Опубликовано ✅');
@@ -1359,15 +1376,6 @@
     $('#chatInput').addEventListener('keypress', function (e) {
       if (e.key === 'Enter') sendMessage();
     });
-
-    $('#chatPhotoInput').onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      compressImage(file, 800, 800, 0.7, (base64) => {
-        tempChatImage = base64;
-        sendMessage();
-      });
-    };
 
     $('#searchUserInput').oninput = (e) => {
       const query = e.target.value.toLowerCase().trim().replace('@', '');
@@ -1618,7 +1626,7 @@
 
   window.sendMessage = () => {
     const text = $('#chatInput').value.trim();
-    if (!text && !tempChatImage) return;
+    if (!text) return;
     if (!activeChatId) return;
     
     $('#chatInput').value = '';
@@ -1626,16 +1634,13 @@
     push(ref(db, 'chats/' + activeChatId + '/messages'), {
       sender: profile.id,
       text: text,
-      image: tempChatImage,
       ts: Date.now()
     });
     
     update(ref(db, 'chats/' + activeChatId), {
-      lastMsg: tempChatImage ? '📷 Фото' : text,
+      lastMsg: text,
       ts: Date.now()
     });
-
-    tempChatImage = null;
   };
 
   function renderChatList() {
@@ -1717,14 +1722,7 @@
     
     msgsContainer.innerHTML = msgArr.map(m => {
       const isMe = m.sender === profile.id;
-      let content = '';
-      if (m.image) {
-        content += `<img src="${m.image}" class="msg-img" onclick="viewFullImage('${m.image}')">`;
-      }
-      if (m.text) {
-        content += `<div>${esc(m.text)}</div>`;
-      }
-      return `<div class="msg ${isMe ? 'my' : 'other'}">${content}</div>`;
+      return `<div class="msg ${isMe ? 'my' : 'other'}">${esc(m.text)}</div>`;
     }).join('');
     
     msgsContainer.scrollTop = msgsContainer.scrollHeight;
@@ -1749,7 +1747,6 @@
       $('#pAvatar').innerHTML = nameToUse.charAt(0).toUpperCase();
     }
 
-    // Подарок в своём профиле
     if (hasForgePrize(profile.id)) {
       $('#pGift').style.display = 'block';
     } else {
@@ -1819,9 +1816,11 @@
         avatarHTML = `<div class="avatar">${esc(p.authorName.charAt(0).toUpperCase())}</div>`;
       }
 
-      let imageHTML = '';
-      if (p.image) {
-        imageHTML = `<img src="${p.image}" class="post-img" onclick="viewFullImage('${p.image}')">`;
+      let imagesHTML = '';
+      // Проверяем, есть ли массив images (новый формат), или старое поле image
+      const imagesArr = p.images || (p.image ? [p.image] : []);
+      if (imagesArr.length > 0) {
+        imagesHTML = imagesArr.map(imgSrc => `<img src="${imgSrc}" class="post-img" onclick="viewFullImage('${imgSrc}')">`).join('');
       }
 
       return `
@@ -1834,7 +1833,7 @@
             </div>
           </div>
           <div class="post-text">${esc(p.text)}</div>
-          ${imageHTML}
+          ${imagesHTML}
           <div class="post-actions">
             <button class="act like-btn ${liked ? 'liked' : ''}" data-pid="${p.id}">
               <svg class="heart-svg" viewBox="0 0 24 24">
@@ -1929,7 +1928,6 @@
       extraHandlesHTML = `<div class="profile-handle" style="font-size:12px; opacity:0.8;">а так же: ${uData.extraHandles.join(', ')}</div>`;
     }
 
-    // Подарок Forge-Prize
     const showGift = hasForgePrize(uData.id);
     const giftHTML = showGift
       ? `<div class="gift-orbit" style="position:absolute; top:-10px; left:-10px;"><img src="${FORGE_PRIZE_IMG}" alt="Forge-Prize"></div>`
